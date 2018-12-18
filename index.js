@@ -102,28 +102,31 @@ var _this = this;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            if (mapping) {
-                                evil.module.registerMapping(path, mapping);
-                            }
-                            window.module.exports = window.exports = {};
                             absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
                             console.log("load(\"" + absolutePath + "\", " + JSON.stringify(mapping) + ")");
                             return [4 /*yield*/, loadScript(absolutePath)];
                         case 1:
                             _a.sent();
-                            evil.modules[absolutePath] = window.module.exports;
-                            return [2 /*return*/];
+                            return [2 /*return*/, evil.module.capture(path, mapping)];
                     }
                 });
             }); },
+            capture: function (path, mapping) {
+                if (mapping) {
+                    evil.module.registerMapping(path, mapping);
+                }
+                var absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
+                var result = evil.modules[absolutePath] = window.module.exports;
+                evil.readyToCapture();
+                return result;
+            },
         },
+        readyToCapture: function () { return window.module.exports = window.exports = {}; },
     };
     var resolveMapping = function (path) {
         return evil.mapping[path] || path;
     };
-    window.module = evil.module;
     window.require = function (path) {
-        console.log("require(\"" + path + "\")");
         var absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
         var result = evil.modules[absolutePath];
         if (!result) {
@@ -133,5 +136,7 @@ var _this = this;
         }
         return result;
     };
+    window.module = evil.module;
+    evil.readyToCapture();
 })();
 //# sourceMappingURL=index.js.map

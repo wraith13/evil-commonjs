@@ -2,7 +2,8 @@
 interface Module
 {
     registerMapping: (path : string, mapping : string[]) => void;
-    load: (path : string, mapping ? : string[]) => Promise<void>;
+    load: (path : string, mapping ? : string[]) => Promise<any>;
+    capture: (path : string, mapping ? : string[]) => any;
     exports: any;
 }
 interface Window
@@ -91,28 +92,33 @@ interface Window
         module : <Module>
         {
             registerMapping: (path : string, mapping : string[]) : void => mapping.forEach(i => evil.mapping[i] = path),
-            load: async (path : string, mapping ? : string[]) : Promise<void> =>
+            load: async (path : string, mapping ? : string[]) : Promise<any> =>
+            {
+                const absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
+                console.log(`load("${absolutePath}", ${JSON.stringify(mapping)})`);
+                await loadScript(absolutePath);
+                return evil.module.capture(path, mapping);
+            },
+            capture: (path : string, mapping ? : string[]) : any =>
             {
                 if (mapping)
                 {
                     evil.module.registerMapping(path, mapping);
                 }
-                window.module.exports = window.exports = {  };
                 const absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
-                console.log(`load("${absolutePath}", ${JSON.stringify(mapping)})`);
-                await loadScript(absolutePath);
-                evil.modules[absolutePath] = window.module.exports;
+                const result = evil.modules[absolutePath] = window.module.exports;
+                evil.readyToCapture();
+                return result;
             },
         },
+        readyToCapture: () => window.module.exports = window.exports = {  },
     };
     const resolveMapping = (path : string) : string =>
     {
         return evil.mapping[path] || path;
     }
-    window.module = evil.module;
     window.require = (path : string) :any =>
     {
-        console.log(`require("${path}")`);
         const absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
         let result = evil.modules[absolutePath];
         if (!result)
@@ -123,5 +129,7 @@ interface Window
         }
         return result;
     }
+    window.module = evil.module;
+    evil.readyToCapture();
 }
 )();

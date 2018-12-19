@@ -98,16 +98,18 @@ var _this = this;
         module: {
             registerMapping: function (path, mapping) { return mapping.forEach(function (i) { return evil.mapping[i] = path; }); },
             load: function (path, mapping) { return __awaiter(_this, void 0, void 0, function () {
-                var absolutePath;
+                var absolutePath, result;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
+                            window.module.readyToCapture();
                             console.log("load(\"" + absolutePath + "\", " + JSON.stringify(mapping) + ")");
                             return [4 /*yield*/, loadScript(absolutePath)];
                         case 1:
                             _a.sent();
-                            return [2 /*return*/, evil.module.capture(path, mapping)];
+                            result = evil.module.capture(path, mapping);
+                            return [2 /*return*/, result];
                     }
                 });
             }); },
@@ -118,7 +120,7 @@ var _this = this;
                 var absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
                 window.module.exports.default = window.module.exports.default || window.module.exports;
                 var result = evil.modules[absolutePath] = window.module.exports;
-                window.module.readyToCapture();
+                window.module.pauseCapture();
                 return result;
             },
             readyToCapture: function () { return window.module.exports = window.exports = {}; },
@@ -140,6 +142,5 @@ var _this = this;
         return result;
     };
     window.module = evil.module;
-    window.module.readyToCapture();
 })();
 //# sourceMappingURL=index.js.map

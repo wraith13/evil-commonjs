@@ -97,9 +97,11 @@ interface Window
             load: async (path : string, mapping ? : string[]) : Promise<any> =>
             {
                 const absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
+                window.module.readyToCapture();
                 console.log(`load("${absolutePath}", ${JSON.stringify(mapping)})`);
                 await loadScript(absolutePath);
-                return evil.module.capture(path, mapping);
+                const result = evil.module.capture(path, mapping);
+                return result;
             },
             capture: (path : string, mapping ? : string[]) : any =>
             {
@@ -110,7 +112,7 @@ interface Window
                 const absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
                 window.module.exports.default = window.module.exports.default || window.module.exports;
                 const result = evil.modules[absolutePath] = window.module.exports;
-                window.module.readyToCapture();
+                window.module.pauseCapture();
                 return result;
             },
             readyToCapture: () => window.module.exports = window.exports = { },
@@ -135,6 +137,5 @@ interface Window
         return result;
     }
     window.module = evil.module;
-    window.module.readyToCapture();
 }
 )();

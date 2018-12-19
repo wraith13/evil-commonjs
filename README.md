@@ -28,10 +28,14 @@ Like this, uou can also get directly from `window.module.load()` without using `
 
 ```html
 <script src="https://wraith13.github.io/evil-commonjs/index.js" />
+<script>
+module.readyToCapture();
+</script>
 
 <script src="aaa/bbb/index.js" />
 <script>
 module.capture("aaa/bbb/index.js", ["bbb"]); // aaa depends on bbb.
+module.readyToCapture();
 </script>
 
 <script src="aaa/index.js" />
@@ -46,10 +50,14 @@ Specify a relative path from `location.href` or a absolute path for first parame
 
 ```html
 <script src="https://wraith13.github.io/evil-commonjs/index.js" />
+<script>
+module.readyToCapture();
+</script>
 
 <script src="aaa/bbb/index.js" />
 <script>
 module.capture("aaa/bbb/index.js", ["bbb"]); // aaa depends on bbb.
+module.readyToCapture();
 </script>
 
 <script src="aaa/index.js" />

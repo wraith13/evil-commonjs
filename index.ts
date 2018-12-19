@@ -4,6 +4,8 @@ interface Module
     registerMapping: (path : string, mapping : string[]) => void;
     load: (path : string, mapping ? : string[]) => Promise<any>;
     capture: (path : string, mapping ? : string[]) => any;
+    readyToCapture: () => void,
+    pauseCapture: () => void,
     exports: any;
 }
 interface Window
@@ -108,11 +110,13 @@ interface Window
                 const absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
                 window.module.exports.default = window.module.exports.default || window.module.exports;
                 const result = evil.modules[absolutePath] = window.module.exports;
-                evil.readyToCapture();
+                window.module.readyToCapture();
                 return result;
             },
+            readyToCapture: () => window.module.exports = window.exports = { },
+            pauseCapture: () => window.exports = undefined,
+            exports: { },
         },
-        readyToCapture: () => window.module.exports = window.exports = { },
     };
     const resolveMapping = (path : string) : string =>
     {
@@ -131,6 +135,6 @@ interface Window
         return result;
     }
     window.module = evil.module;
-    evil.readyToCapture();
+    window.module.readyToCapture();
 }
 )();

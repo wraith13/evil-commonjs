@@ -118,11 +118,13 @@ var _this = this;
                 var absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
                 window.module.exports.default = window.module.exports.default || window.module.exports;
                 var result = evil.modules[absolutePath] = window.module.exports;
-                evil.readyToCapture();
+                window.module.readyToCapture();
                 return result;
             },
+            readyToCapture: function () { return window.module.exports = window.exports = {}; },
+            pauseCapture: function () { return window.exports = undefined; },
+            exports: {},
         },
-        readyToCapture: function () { return window.module.exports = window.exports = {}; },
     };
     var resolveMapping = function (path) {
         return evil.mapping[path] || path;
@@ -138,6 +140,6 @@ var _this = this;
         return result;
     };
     window.module = evil.module;
-    evil.readyToCapture();
+    window.module.readyToCapture();
 })();
 //# sourceMappingURL=index.js.map

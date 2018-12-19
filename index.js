@@ -116,6 +116,7 @@ var _this = this;
                     evil.module.registerMapping(path, mapping);
                 }
                 var absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
+                window.module.exports.default = window.module.exports.default || window.module.exports;
                 var result = evil.modules[absolutePath] = window.module.exports;
                 evil.readyToCapture();
                 return result;

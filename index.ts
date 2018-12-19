@@ -106,12 +106,13 @@ interface Window
                     evil.module.registerMapping(path, mapping);
                 }
                 const absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
+                window.module.exports.default = window.module.exports.default || window.module.exports;
                 const result = evil.modules[absolutePath] = window.module.exports;
                 evil.readyToCapture();
                 return result;
             },
         },
-        readyToCapture: () => window.module.exports = window.exports = {  },
+        readyToCapture: () => window.module.exports = window.exports = { },
     };
     const resolveMapping = (path : string) : string =>
     {

@@ -62,7 +62,7 @@ module.readyToCapture();
 
 <script src="aaa/index.js" />
 <script>
-var aaa = module.capture("aaa/index.js");
+var aaa = module.capture("aaa/index.js"); // 👈
 </script>
 ```
 

@@ -22,7 +22,7 @@ await window.module.load("aaa/bbb/index.js", ["bbb"]); // aaa depends on bbb.
 const aaa = await window.module.load("aaa/index.js");
 ```
 
-Like this, uou can also get directly from `window.module.load()` without using `require`.
+Like this, you can also get directly from `window.module.load()` without using `require`.
 
 ## Usage by JavaScript
 
@@ -66,7 +66,7 @@ var aaa = module.capture("aaa/index.js"); // 👈
 </script>
 ```
 
-Like this, uou can also get directly from `window.module.capture()` without using `require`.
+Like this, you can also get directly from `window.module.capture()` without using `require`.
 
 ## License
 

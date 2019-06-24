@@ -13,6 +13,16 @@ await window.module.load("aaa/bbb/index.js", ["bbb"]); // aaa depends on bbb.
 await window.module.load("aaa/index.js", ["aaa"]);
 ```
 
+or
+
+```typescript
+await window.module.sequentialLoad
+([
+    { path:"aaa/bbb/index.js", mapping:["bbb"] },  // aaa depends on bbb.
+    { path:"aaa/index.js", mapping:["aaa"] },
+]);
+```
+
 You can now use `window.require("aaa")` and `import aaa from 'aaa'` !
 
 Specify a relative path from `location.href` or a absolute path for first parameter of `window.module.load()`.
@@ -67,6 +77,26 @@ var aaa = module.capture("aaa/index.js"); // 👈
 ```
 
 Like this, you can also get directly from `window.module.capture()` without using `require`.
+
+```html
+<script src="https://wraith13.github.io/evil-commonjs/index.js"></script>
+<script>
+window.module.sequentialLoad
+([
+    { path:"aaa/bbb/index.js", mapping:["bbb"] },  // aaa depends on bbb.
+    { path:"aaa/index.js", mapping:["aaa"] },
+]).then
+(
+    map =>
+    {
+        var aaa = require("aaa/index.js");
+        ...
+    }
+);
+</script>
+```
+
+You can also use like this style.
 
 ## How to build
 

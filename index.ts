@@ -27,6 +27,36 @@ interface Window
             document.head.appendChild(script);
         }
     );
+    const loadJsonRaw = async (src : string) : Promise<void> => new Promise<void>
+    (
+        (resolve, reject) =>
+        {
+            const request = new XMLHttpRequest();
+            request.open('GET', src, true);
+            request.onreadystatechange = function()
+            {
+                if (4 === request.readyState)
+                {
+                    if (200 <= request.status && request.status < 300)
+                    {
+                        try
+                        {
+                            resolve(JSON.parse(request.responseText));
+                        }
+                        catch(err)
+                        {
+                            reject(err);
+                        }
+                    }
+                    else
+                    {
+                        reject(request);
+                    }
+                }
+            };
+            request.send(null);
+        }
+    );
     const makeAbsoluteUrl = function(base : string, url : string) : string
     {
         let baseParts = base.split("?")[0].split("/");
@@ -96,11 +126,35 @@ interface Window
             registerMapping: (path : string, mapping : string[]) : void => mapping.forEach(i => evil.mapping[i] = path),
             load: async (path : string, mapping ? : string[]) : Promise<any> =>
             {
-                const absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
-                window.module.readyToCapture();
-                console.log(`load("${absolutePath}", ${JSON.stringify(mapping)})`);
-                await loadScript(absolutePath);
-                const result = evil.module.capture(path, mapping);
+                if (/\.json$/i.test(path))
+                {
+                    if (mapping)
+                    {
+                        evil.module.registerMapping(path, mapping);
+                    }
+                    const absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
+                    console.log(`load("${absolutePath}", ${JSON.stringify(mapping)})`);
+                    const result = evil.modules[absolutePath] = await loadJsonRaw(absolutePath);
+                    window.module.pauseCapture();
+                    return result;
+                    }
+                else
+                {
+                    const absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
+                    window.module.readyToCapture();
+                    console.log(`load("${absolutePath}", ${JSON.stringify(mapping)})`);
+                    await loadScript(absolutePath);
+                    const result = evil.module.capture(path, mapping);
+                    return result;
+                }
+            },
+            sequentialLoad: async (map: [{ path : string, mapping ? : string[] }]) : Promise<any[]> =>
+            {
+                const result = [];
+                for(const i in map)
+                {
+                    result.push(await evil.module.load(map[i].path, map[i].mapping));
+                }
                 return result;
             },
             capture: (path : string, mapping ? : string[]) : any =>

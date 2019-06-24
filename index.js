@@ -46,6 +46,30 @@ var _this = this;
                 })];
         });
     }); };
+    var loadJsonRaw = function (src) { return __awaiter(_this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, new Promise(function (resolve, reject) {
+                    var request = new XMLHttpRequest();
+                    request.open('GET', src, true);
+                    request.onreadystatechange = function () {
+                        if (4 === request.readyState) {
+                            if (200 <= request.status && request.status < 300) {
+                                try {
+                                    resolve(JSON.parse(request.responseText));
+                                }
+                                catch (err) {
+                                    reject(err);
+                                }
+                            }
+                            else {
+                                reject(request);
+                            }
+                        }
+                    };
+                    request.send(null);
+                })];
+        });
+    }); };
     var makeAbsoluteUrl = function (base, url) {
         var baseParts = base.split("?")[0].split("/");
         if (4 <= baseParts.length && "" !== baseParts[baseParts.length - 1]) {
@@ -98,18 +122,58 @@ var _this = this;
         module: {
             registerMapping: function (path, mapping) { return mapping.forEach(function (i) { return evil.mapping[i] = path; }); },
             load: function (path, mapping) { return __awaiter(_this, void 0, void 0, function () {
-                var absolutePath, result;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
+                var absolutePath, result, _a, _b, absolutePath, result;
+                return __generator(this, function (_c) {
+                    switch (_c.label) {
                         case 0:
+                            if (!/\.json$/i.test(path)) return [3 /*break*/, 2];
+                            if (mapping) {
+                                evil.module.registerMapping(path, mapping);
+                            }
+                            absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
+                            console.log("load(\"" + absolutePath + "\", " + JSON.stringify(mapping) + ")");
+                            _a = evil.modules;
+                            _b = absolutePath;
+                            return [4 /*yield*/, loadJsonRaw(absolutePath)];
+                        case 1:
+                            result = _a[_b] = _c.sent();
+                            window.module.pauseCapture();
+                            return [2 /*return*/, result];
+                        case 2:
                             absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
                             window.module.readyToCapture();
                             console.log("load(\"" + absolutePath + "\", " + JSON.stringify(mapping) + ")");
                             return [4 /*yield*/, loadScript(absolutePath)];
-                        case 1:
-                            _a.sent();
+                        case 3:
+                            _c.sent();
                             result = evil.module.capture(path, mapping);
                             return [2 /*return*/, result];
+                    }
+                });
+            }); },
+            sequentialLoad: function (map) { return __awaiter(_this, void 0, void 0, function () {
+                var result, _a, _b, _i, i, _c, _d;
+                return __generator(this, function (_e) {
+                    switch (_e.label) {
+                        case 0:
+                            result = [];
+                            _a = [];
+                            for (_b in map)
+                                _a.push(_b);
+                            _i = 0;
+                            _e.label = 1;
+                        case 1:
+                            if (!(_i < _a.length)) return [3 /*break*/, 4];
+                            i = _a[_i];
+                            _d = (_c = result).push;
+                            return [4 /*yield*/, evil.module.load(map[i].path, map[i].mapping)];
+                        case 2:
+                            _d.apply(_c, [_e.sent()]);
+                            _e.label = 3;
+                        case 3:
+                            _i++;
+                            return [3 /*break*/, 1];
+                        case 4: return [2 /*return*/, result];
                     }
                 });
             }); },

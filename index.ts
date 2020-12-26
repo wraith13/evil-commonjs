@@ -4,8 +4,8 @@ interface Module
     registerMapping: (path : string, mapping : string[]) => void;
     load: (path : string, mapping ? : string[]) => Promise<any>;
     capture: (path : string, mapping ? : string[]) => any;
-    readyToCapture: () => void,
-    pauseCapture: () => void,
+    readyToCapture: () => void;
+    pauseCapture: () => void;
     exports: any;
 }
 interface Window
@@ -21,7 +21,7 @@ interface Window
         (resolve, reject) =>
         {
             const script = <HTMLScriptElement>document.createElement("script");
-            script.src = src
+            script.src = src;
             script.onload = () => resolve();
             script.onerror = reject;
             document.head.appendChild(script);
@@ -126,7 +126,7 @@ interface Window
             registerMapping: (path : string, mapping : string[]) : void => mapping.forEach(i => evil.mapping[i] = path),
             load: async (path : string, mapping ? : string[]) : Promise<any> =>
             {
-                if (/\.json$/i.test(path))
+                if (/\.json(\?.*)?$/i.test(path))
                 {
                     if (mapping)
                     {
@@ -137,7 +137,7 @@ interface Window
                     const result = evil.modules[absolutePath] = await loadJsonRaw(absolutePath);
                     window.module.pauseCapture();
                     return result;
-                    }
+                }
                 else
                 {
                     const absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
@@ -177,19 +177,41 @@ interface Window
     const resolveMapping = (path : string) : string =>
     {
         return evil.mapping[path] || path;
-    }
-    window.require = (path : string) :any =>
+    };
+    globalThis.require = (path : string) :any =>
     {
-        const absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
-        let result = evil.modules[absolutePath];
-        if (!result)
+        switch(path)
         {
-            console.error(`"${path}" is not found! require() of evil-commonjs need to load() in advance.`);
-            console.error(`loaded modules: "${JSON.stringify(Object.keys(evil.modules))}"`);
-            console.error(`module mapping: "${JSON.stringify(evil.mapping)}"`);
+        case "require":
+            return window.require;
+        case "exports":
+            return evil.module.exports;
+        default:
+            const absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
+            let result = evil.modules[absolutePath] ?? evil.modules[path];
+            if (!result)
+            {
+                console.error(evil.modules);
+                console.error(`"${path}" is not found! require() of evil-commonjs need to load() in advance.`);
+                console.error(`loaded modules: "${JSON.stringify(Object.keys(evil.modules))}"`);
+                console.error(`module mapping: "${JSON.stringify(evil.mapping)}"`);
+            }
+            return result;
         }
-        return result;
-    }
+    };
+    globalThis.define = (path : string, requires: string[], content: any) =>
+    {
+        if (/\.json(\?.*)?$/i.test(path) || "function" !== typeof content)
+        {
+            return evil.modules[path] = content;
+        }
+        else
+        {
+            evil.module.readyToCapture();
+            content.apply(null, requires.map(i => globalThis.require(i)));
+            evil.module.capture(path);
+        }
+    };
     window.module = evil.module;
 }
 )();

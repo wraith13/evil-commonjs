@@ -1,8 +1,9 @@
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -126,7 +127,7 @@ var _this = this;
                 return __generator(this, function (_c) {
                     switch (_c.label) {
                         case 0:
-                            if (!/\.json$/i.test(path)) return [3 /*break*/, 2];
+                            if (!/\.json(\?.*)?$/i.test(path)) return [3 /*break*/, 2];
                             if (mapping) {
                                 evil.module.registerMapping(path, mapping);
                             }
@@ -195,15 +196,34 @@ var _this = this;
     var resolveMapping = function (path) {
         return evil.mapping[path] || path;
     };
-    window.require = function (path) {
-        var absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
-        var result = evil.modules[absolutePath];
-        if (!result) {
-            console.error("\"" + path + "\" is not found! require() of evil-commonjs need to load() in advance.");
-            console.error("loaded modules: \"" + JSON.stringify(Object.keys(evil.modules)) + "\"");
-            console.error("module mapping: \"" + JSON.stringify(evil.mapping) + "\"");
+    globalThis.require = function (path) {
+        var _a;
+        switch (path) {
+            case "require":
+                return window.require;
+            case "exports":
+                return evil.module.exports;
+            default:
+                var absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
+                var result = (_a = evil.modules[absolutePath]) !== null && _a !== void 0 ? _a : evil.modules[path];
+                if (!result) {
+                    console.error(evil.modules);
+                    console.error("\"" + path + "\" is not found! require() of evil-commonjs need to load() in advance.");
+                    console.error("loaded modules: \"" + JSON.stringify(Object.keys(evil.modules)) + "\"");
+                    console.error("module mapping: \"" + JSON.stringify(evil.mapping) + "\"");
+                }
+                return result;
         }
-        return result;
+    };
+    globalThis.define = function (path, requires, content) {
+        if (/\.json(\?.*)?$/i.test(path) || "function" !== typeof content) {
+            return evil.modules[path] = content;
+        }
+        else {
+            evil.module.readyToCapture();
+            content.apply(null, requires.map(function (i) { return globalThis.require(i); }));
+            evil.module.capture(path);
+        }
     };
     window.module = evil.module;
 })();

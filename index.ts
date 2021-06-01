@@ -1,4 +1,5 @@
 //  fxxking commonjs
+declare const global: any;
 interface Module
 {
     registerMapping: (path : string, mapping : string[]) => void;
@@ -178,7 +179,8 @@ interface Window
     {
         return evil.mapping[path] || path;
     };
-    globalThis.require = (path : string) :any =>
+    const gThis = globalThis ?? self ?? window ?? global;
+    gThis.require = (path : string) :any =>
     {
         switch(path)
         {
@@ -199,7 +201,7 @@ interface Window
             return result;
         }
     };
-    globalThis.define = (path : string, requires: string[], content: any) =>
+    gThis.define = (path : string, requires: string[], content: any) =>
     {
         if (/\.json(\?.*)?$/i.test(path) || "function" !== typeof content)
         {

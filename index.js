@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 var _this = this;
 (function () {
-    var _a, _b;
+    var _a;
     var loadScript = function (src) { return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             return [2 /*return*/, new Promise(function (resolve, reject) {
@@ -197,7 +197,8 @@ var _this = this;
     var resolveMapping = function (path) {
         return evil.mapping[path] || path;
     };
-    var gThis = (_b = (_a = globalThis !== null && globalThis !== void 0 ? globalThis : self) !== null && _a !== void 0 ? _a : window) !== null && _b !== void 0 ? _b : global;
+    //const gThis = globalThis;
+    var gThis = (_a = self !== null && self !== void 0 ? self : window) !== null && _a !== void 0 ? _a : global;
     gThis.require = function (path) {
         var _a;
         switch (path) {

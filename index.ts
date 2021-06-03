@@ -179,7 +179,8 @@ interface Window
     {
         return evil.mapping[path] || path;
     };
-    const gThis = globalThis ?? self ?? window ?? global;
+    //const gThis = globalThis;
+    const gThis = self ?? window ?? global;
     gThis.require = (path : string) :any =>
     {
         switch(path)

@@ -119,6 +119,7 @@ var _this = this;
         return baseParts.concat(urlParts).join("/");
     };
     var evil = {
+        unresolved: [],
         modules: {},
         mapping: {},
         module: {
@@ -143,7 +144,7 @@ var _this = this;
                             return [2 /*return*/, result];
                         case 2:
                             absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
-                            window.module.readyToCapture();
+                            window.module.readyToCapture(absolutePath);
                             console.log("load(\"" + absolutePath + "\", " + JSON.stringify(mapping) + ")");
                             return [4 /*yield*/, loadScript(absolutePath)];
                         case 3:
@@ -187,9 +188,18 @@ var _this = this;
                 window.module.exports.default = window.module.exports.default || window.module.exports;
                 var result = evil.modules[absolutePath] = window.module.exports;
                 window.module.pauseCapture();
+                evil.unresolved = evil.unresolved.filter(function (i) { return i !== absolutePath; });
                 return result;
             },
-            readyToCapture: function () { return window.module.exports = window.exports = {}; },
+            readyToCapture: function (path) {
+                window.module.exports = window.exports = {};
+                if (path) {
+                    var absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
+                    if (evil.modules[absolutePath]) {
+                        window.module.exports = window.exports = evil.modules[absolutePath];
+                    }
+                }
+            },
             pauseCapture: function () { return window.exports = undefined; },
             exports: {},
         },
@@ -197,6 +207,7 @@ var _this = this;
     var resolveMapping = function (path) {
         return evil.mapping[path] || path;
     };
+    var isStanbyAfterCheck = false;
     //const gThis = globalThis;
     var gThis = (_a = self !== null && self !== void 0 ? self : window) !== null && _a !== void 0 ? _a : global;
     gThis.require = function (path) {
@@ -210,10 +221,23 @@ var _this = this;
                 var absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
                 var result = (_a = evil.modules[absolutePath]) !== null && _a !== void 0 ? _a : evil.modules[path];
                 if (!result) {
-                    console.error(evil.modules);
-                    console.error("\"" + path + "\" is not found! require() of evil-commonjs need to load() in advance.");
-                    console.error("loaded modules: \"" + JSON.stringify(Object.keys(evil.modules)) + "\"");
-                    console.error("module mapping: \"" + JSON.stringify(evil.mapping) + "\"");
+                    result = evil.modules[absolutePath] = {};
+                    evil.unresolved.push(absolutePath);
+                    if (!isStanbyAfterCheck) {
+                        isStanbyAfterCheck = true;
+                        setTimeout(function () {
+                            if (0 < evil.unresolved.length) {
+                                console.error("evil-commonjs: unresoled modules: " + JSON.stringify(evil.unresolved));
+                                // console.error(`"${path}" is not found! require() of evil-commonjs need to load() in advance.`);
+                                console.error("evil-commonjs: loaded modules: \"" + JSON.stringify(Object.keys(evil.modules)) + "\"");
+                                console.error("evil-commonjs: module mapping: \"" + JSON.stringify(evil.mapping) + "\"");
+                                console.error(evil.modules);
+                            }
+                            else {
+                                // console.log("evil-commonjs: everything is OK!");
+                            }
+                        }, 1500);
+                    }
                 }
                 return result;
         }
@@ -223,7 +247,8 @@ var _this = this;
             return evil.modules[path] = content;
         }
         else {
-            evil.module.readyToCapture();
+            var absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
+            evil.module.readyToCapture(absolutePath);
             content.apply(null, requires.map(function (i) { return globalThis.require(i); }));
             evil.module.capture(path);
         }

@@ -134,7 +134,7 @@ var _this = this;
                                 evil.module.registerMapping(path, mapping);
                             }
                             absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
-                            console.log("load(\"" + absolutePath + "\", " + JSON.stringify(mapping) + ")");
+                            console.log("load(\"".concat(absolutePath, "\", ").concat(JSON.stringify(mapping), ")"));
                             _a = evil.modules;
                             _b = absolutePath;
                             return [4 /*yield*/, loadJsonRaw(absolutePath)];
@@ -145,7 +145,7 @@ var _this = this;
                         case 2:
                             absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
                             window.module.readyToCapture(absolutePath);
-                            console.log("load(\"" + absolutePath + "\", " + JSON.stringify(mapping) + ")");
+                            console.log("load(\"".concat(absolutePath, "\", ").concat(JSON.stringify(mapping), ")"));
                             return [4 /*yield*/, loadScript(absolutePath)];
                         case 3:
                             _c.sent();
@@ -209,7 +209,7 @@ var _this = this;
     };
     var isStanbyAfterCheck = false;
     //const gThis = globalThis;
-    var gThis = (_a = self !== null && self !== void 0 ? self : window) !== null && _a !== void 0 ? _a : global;
+    var gThis = ((_a = self !== null && self !== void 0 ? self : window) !== null && _a !== void 0 ? _a : global);
     gThis.require = function (path) {
         var _a;
         switch (path) {
@@ -227,10 +227,10 @@ var _this = this;
                         isStanbyAfterCheck = true;
                         setTimeout(function () {
                             if (0 < evil.unresolved.length) {
-                                console.error("evil-commonjs: unresoled modules: " + JSON.stringify(evil.unresolved));
+                                console.error("evil-commonjs: unresoled modules: ".concat(JSON.stringify(evil.unresolved)));
                                 // console.error(`"${path}" is not found! require() of evil-commonjs need to load() in advance.`);
-                                console.error("evil-commonjs: loaded modules: \"" + JSON.stringify(Object.keys(evil.modules)) + "\"");
-                                console.error("evil-commonjs: module mapping: \"" + JSON.stringify(evil.mapping) + "\"");
+                                console.error("evil-commonjs: loaded modules: \"".concat(JSON.stringify(Object.keys(evil.modules)), "\""));
+                                console.error("evil-commonjs: module mapping: \"".concat(JSON.stringify(evil.mapping), "\""));
                                 console.error(evil.modules);
                             }
                             else {
@@ -249,7 +249,7 @@ var _this = this;
         else {
             var absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
             evil.module.readyToCapture(absolutePath);
-            content.apply(null, requires.map(function (i) { return globalThis.require(i); }));
+            content.apply(null, requires.map(function (i) { return gThis.require(i); }));
             evil.module.capture(path);
         }
     };

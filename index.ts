@@ -119,9 +119,9 @@ interface Window
     };
     const evil =
     {
-        unresolved : [ ],
-        modules : { },
-        mapping : { },
+        unresolved : [ ] as unknown [ ],
+        modules : { } as { [name:string]: unknown },
+        mapping : { } as { [name:string]: string },
         module : <Module>
         {
             registerMapping: (path: string, mapping: string[]): void => mapping.forEach(i => evil.mapping[i] = path),
@@ -193,7 +193,7 @@ interface Window
     };
     let isStanbyAfterCheck = false;
     //const gThis = globalThis;
-    const gThis = self ?? window ?? global;
+    const gThis = (self ?? window ?? global) as unknown as { require: (path: string) => any; define: (path: string, requires: string[], content: any) => unknown, };
     gThis.require = (path: string): any =>
     {
         switch(path)
@@ -246,7 +246,7 @@ interface Window
         {
             const absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
             evil.module.readyToCapture(absolutePath);
-            content.apply(null, requires.map(i => globalThis.require(i)));
+            content.apply(null, requires.map(i => gThis.require(i)));
             evil.module.capture(path);
         }
     };

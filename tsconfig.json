@@ -15,7 +15,6 @@
         "noImplicitThis": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
-        "noImplicitUseStrict": true,
         "sourceMap": true,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,

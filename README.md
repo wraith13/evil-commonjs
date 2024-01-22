@@ -111,3 +111,7 @@ You can use automatic build. Run `Tasks: Allow Automatic Tasks in Folder` comman
 ## License
 
 [Boost Software License](LICENSE_1_0.txt)
+
+## Related projects
+
+- [evil-tsconfig.paths.ts](https://github.com/wraith13/evil-tsconfig.paths.ts)

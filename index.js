@@ -8,12 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -37,6 +37,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var _this = this;
 (function () {
     var _a;
+    var pathStack = [];
+    pathStack.push(location.href);
+    var getCurrentPath = function () { var _a; return (_a = pathStack[pathStack.length - 1]) !== null && _a !== void 0 ? _a : location.href; };
     var loadScript = function (src) { return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             return [2 /*return*/, new Promise(function (resolve, reject) {
@@ -133,7 +136,7 @@ var _this = this;
                             if (mapping) {
                                 evil.module.registerMapping(path, mapping);
                             }
-                            absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
+                            absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
                             console.log("load(\"".concat(absolutePath, "\", ").concat(JSON.stringify(mapping), ")"));
                             _a = evil.modules;
                             _b = absolutePath;
@@ -143,36 +146,47 @@ var _this = this;
                             window.module.pauseCapture();
                             return [2 /*return*/, result];
                         case 2:
-                            absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
+                            absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
+                            _c.label = 3;
+                        case 3:
+                            _c.trys.push([3, , 5, 6]);
+                            pathStack.push(absolutePath);
                             window.module.readyToCapture(absolutePath);
                             console.log("load(\"".concat(absolutePath, "\", ").concat(JSON.stringify(mapping), ")"));
                             return [4 /*yield*/, loadScript(absolutePath)];
-                        case 3:
+                        case 4:
                             _c.sent();
                             result = evil.module.capture(path, mapping);
                             return [2 /*return*/, result];
+                        case 5:
+                            pathStack.pop();
+                            return [7 /*endfinally*/];
+                        case 6: return [2 /*return*/];
                     }
                 });
             }); },
             sequentialLoad: function (map) { return __awaiter(_this, void 0, void 0, function () {
-                var result, _a, _b, _i, i, _c, _d;
-                return __generator(this, function (_e) {
-                    switch (_e.label) {
+                var result, _a, _b, _c, _i, i, _d, _e;
+                return __generator(this, function (_f) {
+                    switch (_f.label) {
                         case 0:
                             result = [];
-                            _a = [];
-                            for (_b in map)
-                                _a.push(_b);
+                            _a = map;
+                            _b = [];
+                            for (_c in _a)
+                                _b.push(_c);
                             _i = 0;
-                            _e.label = 1;
+                            _f.label = 1;
                         case 1:
-                            if (!(_i < _a.length)) return [3 /*break*/, 4];
-                            i = _a[_i];
-                            _d = (_c = result).push;
+                            if (!(_i < _b.length)) return [3 /*break*/, 4];
+                            _c = _b[_i];
+                            if (!(_c in _a)) return [3 /*break*/, 3];
+                            i = _c;
+                            _e = (_d = result).push;
                             return [4 /*yield*/, evil.module.load(map[i].path, map[i].mapping)];
                         case 2:
-                            _d.apply(_c, [_e.sent()]);
-                            _e.label = 3;
+                            _e.apply(_d, [_f.sent()]);
+                            _f.label = 3;
                         case 3:
                             _i++;
                             return [3 /*break*/, 1];
@@ -184,7 +198,7 @@ var _this = this;
                 if (mapping) {
                     evil.module.registerMapping(path, mapping);
                 }
-                var absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
+                var absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
                 window.module.exports.default = window.module.exports.default || window.module.exports;
                 var result = evil.modules[absolutePath] = window.module.exports;
                 window.module.pauseCapture();
@@ -194,7 +208,7 @@ var _this = this;
             readyToCapture: function (path) {
                 window.module.exports = window.exports = {};
                 if (path) {
-                    var absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
+                    var absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
                     if (evil.modules[absolutePath]) {
                         window.module.exports = window.exports = evil.modules[absolutePath];
                     }
@@ -218,7 +232,7 @@ var _this = this;
             case "exports":
                 return evil.module.exports;
             default:
-                var absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
+                var absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
                 var result = (_a = evil.modules[absolutePath]) !== null && _a !== void 0 ? _a : evil.modules[path];
                 if (!result) {
                     result = evil.modules[absolutePath] = {};
@@ -243,14 +257,15 @@ var _this = this;
         }
     };
     gThis.define = function (path, requires, content) {
+        var absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
+        console.log("define(\"".concat(absolutePath, "\", ").concat(JSON.stringify(requires), ", ...)"));
         if (/\.json(\?.*)?$/i.test(path) || "function" !== typeof content) {
-            return evil.modules[path] = content;
+            return evil.modules[absolutePath] = content;
         }
         else {
-            var absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
             evil.module.readyToCapture(absolutePath);
             content.apply(null, requires.map(function (i) { return gThis.require(i); }));
-            evil.module.capture(path);
+            evil.module.capture(absolutePath);
         }
     };
     window.module = evil.module;

@@ -17,6 +17,9 @@ interface Window
 }
 (() =>
 {
+    const pathStack: string[] = [];
+    pathStack.push(location.href);
+    const getCurrentPath = () => pathStack[pathStack.length -1] ?? location.href;
     const loadScript = async (src: string): Promise<void> => new Promise<void>
     (
         (resolve, reject) =>
@@ -133,7 +136,7 @@ interface Window
                     {
                         evil.module.registerMapping(path, mapping);
                     }
-                    const absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
+                    const absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
                     console.log(`load("${absolutePath}", ${JSON.stringify(mapping)})`);
                     const result = evil.modules[absolutePath] = await loadJsonRaw(absolutePath);
                     window.module.pauseCapture();
@@ -141,12 +144,20 @@ interface Window
                 }
                 else
                 {
-                    const absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
-                    window.module.readyToCapture(absolutePath);
-                    console.log(`load("${absolutePath}", ${JSON.stringify(mapping)})`);
-                    await loadScript(absolutePath);
-                    const result = evil.module.capture(path, mapping);
-                    return result;
+                    const absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
+                    try
+                    {
+                        pathStack.push(absolutePath);
+                        window.module.readyToCapture(absolutePath);
+                        console.log(`load("${absolutePath}", ${JSON.stringify(mapping)})`);
+                        await loadScript(absolutePath);
+                        const result = evil.module.capture(path, mapping);
+                        return result;
+                    }
+                    finally
+                    {
+                        pathStack.pop();
+                    }
                 }
             },
             sequentialLoad: async (map: [{ path: string, mapping?: string[] }]): Promise<any[]> =>
@@ -164,7 +175,7 @@ interface Window
                 {
                     evil.module.registerMapping(path, mapping);
                 }
-                const absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
+                const absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
                 window.module.exports.default = window.module.exports.default || window.module.exports;
                 const result = evil.modules[absolutePath] = window.module.exports;
                 window.module.pauseCapture();
@@ -176,7 +187,7 @@ interface Window
                 window.module.exports = window.exports = { };
                 if (path)
                 {
-                    const absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
+                    const absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
                     if (evil.modules[absolutePath])
                     {
                         window.module.exports = window.exports = evil.modules[absolutePath];
@@ -203,7 +214,7 @@ interface Window
         case "exports":
             return evil.module.exports;
         default:
-            const absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
+            const absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
             let result = evil.modules[absolutePath] ?? evil.modules[path];
             if (!result)
             {
@@ -238,16 +249,17 @@ interface Window
     };
     gThis.define = (path: string, requires: string[], content: any) =>
     {
+        const absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
+        console.log(`define("${absolutePath}", ${JSON.stringify(requires)}, ...)`);
         if (/\.json(\?.*)?$/i.test(path) || "function" !== typeof content)
         {
-            return evil.modules[path] = content;
+            return evil.modules[absolutePath] = content;
         }
         else
         {
-            const absolutePath = makeAbsoluteUrl(location.href, resolveMapping(path));
             evil.module.readyToCapture(absolutePath);
             content.apply(null, requires.map(i => gThis.require(i)));
-            evil.module.capture(path);
+            evil.module.capture(absolutePath);
         }
     };
     window.module = evil.module;

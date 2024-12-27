@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 var _this = this;
 (function () {
-    var _a;
+    var _a, _b, _c, _d;
     var pathStack = [];
     pathStack.push(location.href);
     var getCurrentPath = function () { var _a; return (_a = pathStack[pathStack.length - 1]) !== null && _a !== void 0 ? _a : location.href; };
@@ -137,7 +137,9 @@ var _this = this;
                                 evil.module.registerMapping(path, mapping);
                             }
                             absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
-                            console.log("load(\"".concat(absolutePath, "\", ").concat(JSON.stringify(mapping), ")"));
+                            if (config.log.load) {
+                                console.log("load(\"".concat(absolutePath, "\", ").concat(JSON.stringify(mapping), ")"));
+                            }
                             _a = evil.modules;
                             _b = absolutePath;
                             return [4 /*yield*/, loadJsonRaw(absolutePath)];
@@ -152,7 +154,9 @@ var _this = this;
                             _c.trys.push([3, , 5, 6]);
                             pathStack.push(absolutePath);
                             window.module.readyToCapture(absolutePath);
-                            console.log("load(\"".concat(absolutePath, "\", ").concat(JSON.stringify(mapping), ")"));
+                            if (config.log.load) {
+                                console.log("load(\"".concat(absolutePath, "\", ").concat(JSON.stringify(mapping), ")"));
+                            }
                             return [4 /*yield*/, loadScript(absolutePath)];
                         case 4:
                             _c.sent();
@@ -224,6 +228,22 @@ var _this = this;
     var isStanbyAfterCheck = false;
     //const gThis = globalThis;
     var gThis = ((_a = self !== null && self !== void 0 ? self : window) !== null && _a !== void 0 ? _a : global);
+    try {
+        evilCommonjsConfig;
+    }
+    catch (_e) {
+        evilCommonjsConfig = undefined;
+    }
+    var config = {
+        log: {
+            config: true === ((_b = evilCommonjsConfig === null || evilCommonjsConfig === void 0 ? void 0 : evilCommonjsConfig.log) === null || _b === void 0 ? void 0 : _b.config),
+            load: false !== ((_c = evilCommonjsConfig === null || evilCommonjsConfig === void 0 ? void 0 : evilCommonjsConfig.log) === null || _c === void 0 ? void 0 : _c.load),
+            define: false !== ((_d = evilCommonjsConfig === null || evilCommonjsConfig === void 0 ? void 0 : evilCommonjsConfig.log) === null || _d === void 0 ? void 0 : _d.define),
+        },
+    };
+    if (config.log.config) {
+        console.log("evilCommonjsConfig: ".concat(JSON.stringify(evilCommonjsConfig)));
+    }
     gThis.require = function (path) {
         var _a;
         switch (path) {
@@ -258,7 +278,9 @@ var _this = this;
     };
     gThis.define = function (path, requires, content) {
         var absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
-        console.log("define(\"".concat(absolutePath, "\", ").concat(JSON.stringify(requires), ", ...)"));
+        if (config.log.define) {
+            console.log("define(\"".concat(absolutePath, "\", ").concat(JSON.stringify(requires), ", ...)"));
+        }
         if (/\.json(\?.*)?$/i.test(path) || "function" !== typeof content) {
             return evil.modules[absolutePath] = content;
         }

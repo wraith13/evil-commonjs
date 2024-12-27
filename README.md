@@ -39,48 +39,6 @@ Like this, you can also get directly from `window.module.load()` without using `
 ```html
 <script src="https://wraith13.github.io/evil-commonjs/index.js"></script>
 <script>
-module.readyToCapture();
-</script>
-
-<script src="aaa/bbb/index.js"></script>
-<script>
-module.capture("aaa/bbb/index.js", ["bbb"]); // aaa depends on bbb.
-module.readyToCapture();
-</script>
-
-<script src="aaa/index.js"></script>
-<script>
-module.capture("aaa/index.js", ["aaa"]);
-</script>
-```
-
-You can now use `require("aaa")` !
-
-Specify a relative path from `location.href` or a absolute path for first parameter of `module.capture()`.　( In this case, the specified path is used only for identify. )
-
-```html
-<script src="https://wraith13.github.io/evil-commonjs/index.js"></script>
-<script>
-module.readyToCapture();
-</script>
-
-<script src="aaa/bbb/index.js"></script>
-<script>
-module.capture("aaa/bbb/index.js", ["bbb"]); // aaa depends on bbb.
-module.readyToCapture();
-</script>
-
-<script src="aaa/index.js"></script>
-<script>
-var aaa = module.capture("aaa/index.js"); // 👈
-</script>
-```
-
-Like this, you can also get directly from `window.module.capture()` without using `require`.
-
-```html
-<script src="https://wraith13.github.io/evil-commonjs/index.js"></script>
-<script>
 window.module.sequentialLoad
 ([
     { path:"aaa/bbb/index.js", mapping:["bbb"] },  // aaa depends on bbb.
@@ -97,6 +55,25 @@ window.module.sequentialLoad
 ```
 
 You can also use like this style.
+
+## Console log settings
+
+You can specify console output settings as follows.
+
+```html
+<script>
+const evilCommonjsConfig =
+{
+    log:
+    {
+        config: false,
+        load: true,
+        define: true,
+    },
+};
+</script>
+<script src="https://wraith13.github.io/evil-commonjs/index.js"></script>
+```
 
 ## How to build
 

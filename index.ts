@@ -1,5 +1,14 @@
 //  fxxking commonjs
 declare const global: any;
+declare const evilCommonjsConfig: undefined |
+{
+    log?:
+    {
+        config?: boolean;
+        load?: boolean;
+        define?: boolean;
+    }
+};
 interface Module
 {
     registerMapping: (path: string, mapping: string[]) => void;
@@ -137,7 +146,10 @@ interface Window
                         evil.module.registerMapping(path, mapping);
                     }
                     const absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
-                    console.log(`load("${absolutePath}", ${JSON.stringify(mapping)})`);
+                    if (config.log.load)
+                    {
+                        console.log(`load("${absolutePath}", ${JSON.stringify(mapping)})`);
+                    }
                     const result = evil.modules[absolutePath] = await loadJsonRaw(absolutePath);
                     window.module.pauseCapture();
                     return result;
@@ -149,7 +161,10 @@ interface Window
                     {
                         pathStack.push(absolutePath);
                         window.module.readyToCapture(absolutePath);
-                        console.log(`load("${absolutePath}", ${JSON.stringify(mapping)})`);
+                        if (config.log.load)
+                        {
+                            console.log(`load("${absolutePath}", ${JSON.stringify(mapping)})`);
+                        }
                         await loadScript(absolutePath);
                         const result = evil.module.capture(path, mapping);
                         return result;
@@ -204,7 +219,32 @@ interface Window
     };
     let isStanbyAfterCheck = false;
     //const gThis = globalThis;
-    const gThis = (self ?? window ?? global) as unknown as { require: (path: string) => any; define: (path: string, requires: string[], content: any) => unknown, };
+    const gThis = (self ?? window ?? global) as unknown as
+    {
+        require: (path: string) => any;
+        define: (path: string, requires: string[], content: any) => unknown;
+    };
+    try
+    {
+        evilCommonjsConfig;
+    }
+    catch
+    {
+        (evilCommonjsConfig as any) = undefined;
+    }
+    const config =
+    {
+        log:
+        {
+            config: true === evilCommonjsConfig?.log?.config,
+            load: false !== evilCommonjsConfig?.log?.load,
+            define: false !== evilCommonjsConfig?.log?.define,
+        },
+    };
+    if (config.log.config)
+    {
+        console.log(`evilCommonjsConfig: ${JSON.stringify(evilCommonjsConfig)}`);
+    }
     gThis.require = (path: string): any =>
     {
         switch(path)
@@ -250,7 +290,10 @@ interface Window
     gThis.define = (path: string, requires: string[], content: any) =>
     {
         const absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
-        console.log(`define("${absolutePath}", ${JSON.stringify(requires)}, ...)`);
+        if (config.log.define)
+        {
+            console.log(`define("${absolutePath}", ${JSON.stringify(requires)}, ...)`);
+        }
         if (/\.json(\?.*)?$/i.test(path) || "function" !== typeof content)
         {
             return evil.modules[absolutePath] = content;

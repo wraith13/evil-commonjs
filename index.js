@@ -225,7 +225,6 @@ var _this = this;
     var resolveMapping = function (path) {
         return evil.mapping[path] || path;
     };
-    var isStanbyAfterCheck = false;
     //const gThis = globalThis;
     var gThis = ((_a = self !== null && self !== void 0 ? self : window) !== null && _a !== void 0 ? _a : global);
     try {
@@ -240,9 +239,10 @@ var _this = this;
             load: false !== ((_c = evilCommonjsConfig === null || evilCommonjsConfig === void 0 ? void 0 : evilCommonjsConfig.log) === null || _c === void 0 ? void 0 : _c.load),
             define: false !== ((_d = evilCommonjsConfig === null || evilCommonjsConfig === void 0 ? void 0 : evilCommonjsConfig.log) === null || _d === void 0 ? void 0 : _d.define),
         },
+        loadingTimeout: "number" === typeof (evilCommonjsConfig === null || evilCommonjsConfig === void 0 ? void 0 : evilCommonjsConfig.loadingTimeout) ? evilCommonjsConfig.loadingTimeout : 1500,
     };
     if (config.log.config) {
-        console.log("evilCommonjsConfig: ".concat(JSON.stringify(evilCommonjsConfig)));
+        console.log("evilCommonjsConfig: ".concat(JSON.stringify(config)));
     }
     gThis.require = function (path) {
         var _a;
@@ -257,21 +257,6 @@ var _this = this;
                 if (!result) {
                     result = evil.modules[absolutePath] = {};
                     evil.unresolved.push(absolutePath);
-                    if (!isStanbyAfterCheck) {
-                        isStanbyAfterCheck = true;
-                        setTimeout(function () {
-                            if (0 < evil.unresolved.length) {
-                                console.error("evil-commonjs: unresoled modules: ".concat(JSON.stringify(evil.unresolved)));
-                                // console.error(`"${path}" is not found! require() of evil-commonjs need to load() in advance.`);
-                                console.error("evil-commonjs: loaded modules: \"".concat(JSON.stringify(Object.keys(evil.modules)), "\""));
-                                console.error("evil-commonjs: module mapping: \"".concat(JSON.stringify(evil.mapping), "\""));
-                                console.error(evil.modules);
-                            }
-                            else {
-                                // console.log("evil-commonjs: everything is OK!");
-                            }
-                        }, 1500);
-                    }
                 }
                 return result;
         }
@@ -290,6 +275,18 @@ var _this = this;
             evil.module.capture(absolutePath);
         }
     };
+    setTimeout(function () {
+        if (0 < evil.unresolved.length) {
+            console.error("evil-commonjs: unresoled modules: ".concat(JSON.stringify(evil.unresolved)));
+            // console.error(`"${path}" is not found! require() of evil-commonjs need to load() in advance.`);
+            console.error("evil-commonjs: loaded modules: \"".concat(JSON.stringify(Object.keys(evil.modules)), "\""));
+            console.error("evil-commonjs: module mapping: \"".concat(JSON.stringify(evil.mapping), "\""));
+            console.error(evil.modules);
+        }
+        else {
+            // console.log("evil-commonjs: everything is OK!");
+        }
+    }, config.loadingTimeout);
     window.module = evil.module;
 })();
 //# sourceMappingURL=index.js.map

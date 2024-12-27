@@ -18,7 +18,7 @@ or
 ```typescript
 await window.module.sequentialLoad
 ([
-    { path:"aaa/bbb/index.js", mapping:["bbb"] },  // aaa depends on bbb.
+    { path:"aaa/bbb/index.js", mapping:["bbb"] }, // aaa depends on bbb.
     { path:"aaa/index.js", mapping:["aaa"] },
 ]);
 ```
@@ -41,7 +41,7 @@ Like this, you can also get directly from `window.module.load()` without using `
 <script>
 window.module.sequentialLoad
 ([
-    { path:"aaa/bbb/index.js", mapping:["bbb"] },  // aaa depends on bbb.
+    { path:"aaa/bbb/index.js", mapping:["bbb"] }, // aaa depends on bbb.
     { path:"aaa/index.js", mapping:["aaa"] },
 ]).then
 (
@@ -70,6 +70,7 @@ const evilCommonjsConfig =
         load: true,
         define: true,
     },
+    loadingTimeout: 1500,
 };
 </script>
 <script src="https://wraith13.github.io/evil-commonjs/index.js"></script>

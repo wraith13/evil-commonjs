@@ -8,6 +8,7 @@ declare const evilCommonjsConfig: undefined |
         load?: boolean;
         define?: boolean;
     }
+    loadingTimeout?: number;
 };
 interface Module
 {
@@ -217,7 +218,6 @@ interface Window
     {
         return evil.mapping[path] || path;
     };
-    let isStanbyAfterCheck = false;
     //const gThis = globalThis;
     const gThis = (self ?? window ?? global) as unknown as
     {
@@ -240,10 +240,11 @@ interface Window
             load: false !== evilCommonjsConfig?.log?.load,
             define: false !== evilCommonjsConfig?.log?.define,
         },
+        loadingTimeout: "number" === typeof evilCommonjsConfig?.loadingTimeout ? evilCommonjsConfig.loadingTimeout: 1500,
     };
     if (config.log.config)
     {
-        console.log(`evilCommonjsConfig: ${JSON.stringify(evilCommonjsConfig)}`);
+        console.log(`evilCommonjsConfig: ${JSON.stringify(config)}`);
     }
     gThis.require = (path: string): any =>
     {
@@ -260,29 +261,6 @@ interface Window
             {
                 result = evil.modules[absolutePath] = { };
                 evil.unresolved.push(absolutePath);
-                if ( ! isStanbyAfterCheck)
-                {
-                    isStanbyAfterCheck = true;
-                    setTimeout
-                    (
-                        () =>
-                        {
-                            if (0 < evil.unresolved.length)
-                            {
-                                console.error(`evil-commonjs: unresoled modules: ${JSON.stringify(evil.unresolved)}`);
-                                // console.error(`"${path}" is not found! require() of evil-commonjs need to load() in advance.`);
-                                console.error(`evil-commonjs: loaded modules: "${JSON.stringify(Object.keys(evil.modules))}"`);
-                                console.error(`evil-commonjs: module mapping: "${JSON.stringify(evil.mapping)}"`);
-                                console.error(evil.modules);
-                            }
-                            else
-                            {
-                                // console.log("evil-commonjs: everything is OK!");
-                            }
-                        },
-                        1500
-                    );
-                }
             }
             return result;
         }
@@ -305,6 +283,25 @@ interface Window
             evil.module.capture(absolutePath);
         }
     };
+    setTimeout
+    (
+        () =>
+        {
+            if (0 < evil.unresolved.length)
+            {
+                console.error(`evil-commonjs: unresoled modules: ${JSON.stringify(evil.unresolved)}`);
+                // console.error(`"${path}" is not found! require() of evil-commonjs need to load() in advance.`);
+                console.error(`evil-commonjs: loaded modules: "${JSON.stringify(Object.keys(evil.modules))}"`);
+                console.error(`evil-commonjs: module mapping: "${JSON.stringify(evil.mapping)}"`);
+                console.error(evil.modules);
+            }
+            else
+            {
+                // console.log("evil-commonjs: everything is OK!");
+            }
+        },
+        config.loadingTimeout
+    );
     window.module = evil.module;
 }
 )();

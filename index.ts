@@ -150,7 +150,7 @@ interface Window
                     const absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
                     if (config.log.load)
                     {
-                        console.log(`load("${absolutePath}", ${JSON.stringify(mapping)})`);
+                        console.log(`evil-commonjs: load("${absolutePath}", ${JSON.stringify(mapping)})`);
                     }
                     const result = evil.modules[absolutePath] = await loadJsonRaw(absolutePath);
                     window.module.pauseCapture();
@@ -165,7 +165,7 @@ interface Window
                         window.module.readyToCapture(absolutePath);
                         if (config.log.load)
                         {
-                            console.log(`load("${absolutePath}", ${JSON.stringify(mapping)})`);
+                            console.log(`evil-commonjs: load("${absolutePath}", ${JSON.stringify(mapping)})`);
                         }
                         await loadScript(absolutePath);
                         const result = evil.module.capture(path, mapping);
@@ -246,7 +246,7 @@ interface Window
     };
     if (config.log.config)
     {
-        console.log(`evilCommonjsConfig: ${JSON.stringify(config)}`);
+        console.log(`evil-commonjs: evilCommonjsConfig: ${JSON.stringify(config)}`);
     }
     gThis.require = (path: string): any =>
     {
@@ -272,7 +272,7 @@ interface Window
         const absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
         if (config.log.define)
         {
-            console.log(`define("${absolutePath}", ${JSON.stringify(requires)}, ...)`);
+            console.log(`evil-commonjs: define("${absolutePath}", ${JSON.stringify(requires)}, ...)`);
         }
         if (/\.json(\?.*)?$/i.test(path) || "function" !== typeof content)
         {

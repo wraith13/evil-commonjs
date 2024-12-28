@@ -138,7 +138,7 @@ var _this = this;
                             }
                             absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
                             if (config.log.load) {
-                                console.log("load(\"".concat(absolutePath, "\", ").concat(JSON.stringify(mapping), ")"));
+                                console.log("evil-commonjs: load(\"".concat(absolutePath, "\", ").concat(JSON.stringify(mapping), ")"));
                             }
                             _a = evil.modules;
                             _b = absolutePath;
@@ -155,7 +155,7 @@ var _this = this;
                             pathStack.push(absolutePath);
                             window.module.readyToCapture(absolutePath);
                             if (config.log.load) {
-                                console.log("load(\"".concat(absolutePath, "\", ").concat(JSON.stringify(mapping), ")"));
+                                console.log("evil-commonjs: load(\"".concat(absolutePath, "\", ").concat(JSON.stringify(mapping), ")"));
                             }
                             return [4 /*yield*/, loadScript(absolutePath)];
                         case 4:
@@ -243,7 +243,7 @@ var _this = this;
         loadingTimeout: "number" === typeof (evilCommonjsConfig === null || evilCommonjsConfig === void 0 ? void 0 : evilCommonjsConfig.loadingTimeout) ? evilCommonjsConfig.loadingTimeout : 1500,
     };
     if (config.log.config) {
-        console.log("evilCommonjsConfig: ".concat(JSON.stringify(config)));
+        console.log("evil-commonjs: evilCommonjsConfig: ".concat(JSON.stringify(config)));
     }
     gThis.require = function (path) {
         var _a;
@@ -265,7 +265,7 @@ var _this = this;
     gThis.define = function (path, requires, content) {
         var absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
         if (config.log.define) {
-            console.log("define(\"".concat(absolutePath, "\", ").concat(JSON.stringify(requires), ", ...)"));
+            console.log("evil-commonjs: define(\"".concat(absolutePath, "\", ").concat(JSON.stringify(requires), ", ...)"));
         }
         if (/\.json(\?.*)?$/i.test(path) || "function" !== typeof content) {
             return evil.modules[absolutePath] = content;

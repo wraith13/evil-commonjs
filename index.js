@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 var _this = this;
 (function () {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e;
     var pathStack = [];
     pathStack.push(location.href);
     var getCurrentPath = function () { var _a; return (_a = pathStack[pathStack.length - 1]) !== null && _a !== void 0 ? _a : location.href; };
@@ -230,7 +230,7 @@ var _this = this;
     try {
         evilCommonjsConfig;
     }
-    catch (_e) {
+    catch (_f) {
         evilCommonjsConfig = undefined;
     }
     var config = {
@@ -238,6 +238,7 @@ var _this = this;
             config: true === ((_b = evilCommonjsConfig === null || evilCommonjsConfig === void 0 ? void 0 : evilCommonjsConfig.log) === null || _b === void 0 ? void 0 : _b.config),
             load: false !== ((_c = evilCommonjsConfig === null || evilCommonjsConfig === void 0 ? void 0 : evilCommonjsConfig.log) === null || _c === void 0 ? void 0 : _c.load),
             define: false !== ((_d = evilCommonjsConfig === null || evilCommonjsConfig === void 0 ? void 0 : evilCommonjsConfig.log) === null || _d === void 0 ? void 0 : _d.define),
+            results: true === ((_e = evilCommonjsConfig === null || evilCommonjsConfig === void 0 ? void 0 : evilCommonjsConfig.log) === null || _e === void 0 ? void 0 : _e.results),
         },
         loadingTimeout: "number" === typeof (evilCommonjsConfig === null || evilCommonjsConfig === void 0 ? void 0 : evilCommonjsConfig.loadingTimeout) ? evilCommonjsConfig.loadingTimeout : 1500,
     };
@@ -279,12 +280,17 @@ var _this = this;
         if (0 < evil.unresolved.length) {
             console.error("evil-commonjs: unresoled modules: ".concat(JSON.stringify(evil.unresolved)));
             // console.error(`"${path}" is not found! require() of evil-commonjs need to load() in advance.`);
-            console.error("evil-commonjs: loaded modules: \"".concat(JSON.stringify(Object.keys(evil.modules)), "\""));
-            console.error("evil-commonjs: module mapping: \"".concat(JSON.stringify(evil.mapping), "\""));
+            console.error("evil-commonjs: module mapping: ".concat(JSON.stringify(evil.mapping)));
+            console.error("evil-commonjs: loaded modules: ".concat(JSON.stringify(Object.keys(evil.modules))));
             console.error(evil.modules);
         }
         else {
-            // console.log("evil-commonjs: everything is OK!");
+            if (config.log.results) {
+                console.log("evil-commonjs: everything is OK!");
+                console.log("evil-commonjs: module mapping: ".concat(JSON.stringify(evil.mapping)));
+                console.log("evil-commonjs: loaded modules: ".concat(JSON.stringify(Object.keys(evil.modules))));
+                console.log(evil.modules);
+            }
         }
     }, config.loadingTimeout);
     window.module = evil.module;

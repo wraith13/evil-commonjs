@@ -7,6 +7,7 @@ declare const evilCommonjsConfig: undefined |
         config?: boolean;
         load?: boolean;
         define?: boolean;
+        results?: boolean;
     }
     loadingTimeout?: number;
 };
@@ -239,6 +240,7 @@ interface Window
             config: true === evilCommonjsConfig?.log?.config,
             load: false !== evilCommonjsConfig?.log?.load,
             define: false !== evilCommonjsConfig?.log?.define,
+            results: true === evilCommonjsConfig?.log?.results,
         },
         loadingTimeout: "number" === typeof evilCommonjsConfig?.loadingTimeout ? evilCommonjsConfig.loadingTimeout: 1500,
     };
@@ -291,13 +293,19 @@ interface Window
             {
                 console.error(`evil-commonjs: unresoled modules: ${JSON.stringify(evil.unresolved)}`);
                 // console.error(`"${path}" is not found! require() of evil-commonjs need to load() in advance.`);
-                console.error(`evil-commonjs: loaded modules: "${JSON.stringify(Object.keys(evil.modules))}"`);
-                console.error(`evil-commonjs: module mapping: "${JSON.stringify(evil.mapping)}"`);
+                console.error(`evil-commonjs: module mapping: ${JSON.stringify(evil.mapping)}`);
+                console.error(`evil-commonjs: loaded modules: ${JSON.stringify(Object.keys(evil.modules))}`);
                 console.error(evil.modules);
             }
             else
             {
-                // console.log("evil-commonjs: everything is OK!");
+                if (config.log.results)
+                {
+                    console.log("evil-commonjs: everything is OK!");
+                    console.log(`evil-commonjs: module mapping: ${JSON.stringify(evil.mapping)}`);
+                    console.log(`evil-commonjs: loaded modules: ${JSON.stringify(Object.keys(evil.modules))}`);
+                    console.log(evil.modules);
+                }
             }
         },
         config.loadingTimeout

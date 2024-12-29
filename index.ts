@@ -244,6 +244,53 @@ interface Window
         },
         loadingTimeout: "number" === typeof evilCommonjsConfig?.loadingTimeout ? evilCommonjsConfig.loadingTimeout: 1500,
     };
+    try
+    {
+        const urlConfig = location.href
+            .split("#")[0]
+            .split("?")[1]
+            ?.split("&")
+            ?.filter(i => i.startsWith("evil-commonjs="))
+            ?.map(i => JSON.parse(decodeURIComponent(i.substring("evil-commonjs=".length))))
+            ?.[0];
+        if (urlConfig)
+        {
+            if ("object" === typeof urlConfig)
+            {
+                if ("log" in urlConfig)
+                {
+                    if ("object" === typeof urlConfig["log"])
+                    {
+                        const urlConfigLog = urlConfig["log"];
+                        if ("config" in urlConfigLog && "boolean" === typeof urlConfigLog["config"])
+                        {
+                            config.log.config = urlConfigLog["config"];
+                        }
+                        if ("load" in urlConfigLog && "boolean" === typeof urlConfigLog["load"])
+                        {
+                            config.log.load = urlConfigLog["load"];
+                        }
+                        if ("define" in urlConfigLog && "boolean" === typeof urlConfigLog["define"])
+                        {
+                            config.log.define = urlConfigLog["define"];
+                        }
+                        if ("results" in urlConfigLog && "boolean" === typeof urlConfigLog["results"])
+                        {
+                            config.log.results = urlConfigLog["results"];
+                        }
+                    }
+                }
+                if ("loadingTimeout" in urlConfig && "number" === typeof urlConfig["loadingTimeout"])
+                {
+                    config.loadingTimeout = urlConfig["loadingTimeout"];
+                }
+            }
+        }
+    }
+    catch(err)
+    {
+        console.error(err);
+    }
     if (config.log.config)
     {
         console.log(`evil-commonjs: evilCommonjsConfig: ${JSON.stringify(config)}`);

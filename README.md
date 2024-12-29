@@ -69,11 +69,22 @@ const evilCommonjsConfig =
         config: false,
         load: true,
         define: true,
+        results: false,
     },
     loadingTimeout: 1500,
 };
 </script>
 <script src="https://wraith13.github.io/evil-commonjs/index.js"></script>
+```
+
+All individual settings are optional.
+
+### on URL
+
+You can also specify console output settings on URL. Note that the arguments here must be valid as JSON.( 🚫 `...?evil-commonjs={loadingTimeout:1500,}` → ✅ `...?evil-commonjs={"loadingTimeout":1500}` )
+
+```url
+https://example.com/your-page-path?evil-commonjs={"log":{"config":false,"load":true,"define":true,"results":false},"loadingTimeout":1500}
 ```
 
 ## How to build

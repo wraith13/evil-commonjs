@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 var _this = this;
 (function () {
-    var _a, _b, _c, _d, _e;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
     var pathStack = [];
     pathStack.push(location.href);
     var getCurrentPath = function () { var _a; return (_a = pathStack[pathStack.length - 1]) !== null && _a !== void 0 ? _a : location.href; };
@@ -230,7 +230,7 @@ var _this = this;
     try {
         evilCommonjsConfig;
     }
-    catch (_f) {
+    catch (_k) {
         evilCommonjsConfig = undefined;
     }
     var config = {
@@ -242,6 +242,38 @@ var _this = this;
         },
         loadingTimeout: "number" === typeof (evilCommonjsConfig === null || evilCommonjsConfig === void 0 ? void 0 : evilCommonjsConfig.loadingTimeout) ? evilCommonjsConfig.loadingTimeout : 1500,
     };
+    try {
+        var urlConfig = (_j = (_h = (_g = (_f = location.href
+            .split("#")[0]
+            .split("?")[1]) === null || _f === void 0 ? void 0 : _f.split("&")) === null || _g === void 0 ? void 0 : _g.filter(function (i) { return i.startsWith("evil-commonjs="); })) === null || _h === void 0 ? void 0 : _h.map(function (i) { return JSON.parse(decodeURIComponent(i.substring("evil-commonjs=".length))); })) === null || _j === void 0 ? void 0 : _j[0];
+        if (urlConfig) {
+            if ("object" === typeof urlConfig) {
+                if ("log" in urlConfig) {
+                    if ("object" === typeof urlConfig["log"]) {
+                        var urlConfigLog = urlConfig["log"];
+                        if ("config" in urlConfigLog && "boolean" === typeof urlConfigLog["config"]) {
+                            config.log.config = urlConfigLog["config"];
+                        }
+                        if ("load" in urlConfigLog && "boolean" === typeof urlConfigLog["load"]) {
+                            config.log.load = urlConfigLog["load"];
+                        }
+                        if ("define" in urlConfigLog && "boolean" === typeof urlConfigLog["define"]) {
+                            config.log.define = urlConfigLog["define"];
+                        }
+                        if ("results" in urlConfigLog && "boolean" === typeof urlConfigLog["results"]) {
+                            config.log.results = urlConfigLog["results"];
+                        }
+                    }
+                }
+                if ("loadingTimeout" in urlConfig && "number" === typeof urlConfig["loadingTimeout"]) {
+                    config.loadingTimeout = urlConfig["loadingTimeout"];
+                }
+            }
+        }
+    }
+    catch (err) {
+        console.error(err);
+    }
     if (config.log.config) {
         console.log("evil-commonjs: evilCommonjsConfig: ".concat(JSON.stringify(config)));
     }

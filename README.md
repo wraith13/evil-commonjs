@@ -69,6 +69,7 @@ const evilCommonjsConfig =
         config: false,
         load: true,
         define: true,
+        readyToCapture: true,
         results: false,
     },
     loadingTimeout: 1500,

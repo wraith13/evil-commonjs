@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 var _this = this;
 (function () {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
     var pathStack = [];
     pathStack.push(location.href);
     var getCurrentPath = function () { var _a; return (_a = pathStack[pathStack.length - 1]) !== null && _a !== void 0 ? _a : location.href; };
@@ -210,6 +210,9 @@ var _this = this;
                 return result;
             },
             readyToCapture: function (path) {
+                if (config.log.readyToCapture) {
+                    console.log("readyToCapture(\"".concat(path, "\")"));
+                }
                 window.module.exports = window.exports = {};
                 if (path) {
                     var absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
@@ -230,7 +233,7 @@ var _this = this;
     try {
         evilCommonjsConfig;
     }
-    catch (_k) {
+    catch (_l) {
         evilCommonjsConfig = undefined;
     }
     var config = {
@@ -238,14 +241,15 @@ var _this = this;
             config: true === ((_b = evilCommonjsConfig === null || evilCommonjsConfig === void 0 ? void 0 : evilCommonjsConfig.log) === null || _b === void 0 ? void 0 : _b.config),
             load: false !== ((_c = evilCommonjsConfig === null || evilCommonjsConfig === void 0 ? void 0 : evilCommonjsConfig.log) === null || _c === void 0 ? void 0 : _c.load),
             define: false !== ((_d = evilCommonjsConfig === null || evilCommonjsConfig === void 0 ? void 0 : evilCommonjsConfig.log) === null || _d === void 0 ? void 0 : _d.define),
-            results: true === ((_e = evilCommonjsConfig === null || evilCommonjsConfig === void 0 ? void 0 : evilCommonjsConfig.log) === null || _e === void 0 ? void 0 : _e.results),
+            readyToCapture: false !== ((_e = evilCommonjsConfig === null || evilCommonjsConfig === void 0 ? void 0 : evilCommonjsConfig.log) === null || _e === void 0 ? void 0 : _e.readyToCapture),
+            results: true === ((_f = evilCommonjsConfig === null || evilCommonjsConfig === void 0 ? void 0 : evilCommonjsConfig.log) === null || _f === void 0 ? void 0 : _f.results),
         },
         loadingTimeout: "number" === typeof (evilCommonjsConfig === null || evilCommonjsConfig === void 0 ? void 0 : evilCommonjsConfig.loadingTimeout) ? evilCommonjsConfig.loadingTimeout : 1500,
     };
     try {
-        var urlConfig = (_j = (_h = (_g = (_f = location.href
+        var urlConfig = (_k = (_j = (_h = (_g = location.href
             .split("#")[0]
-            .split("?")[1]) === null || _f === void 0 ? void 0 : _f.split("&")) === null || _g === void 0 ? void 0 : _g.filter(function (i) { return i.startsWith("evil-commonjs="); })) === null || _h === void 0 ? void 0 : _h.map(function (i) { return JSON.parse(decodeURIComponent(i.substring("evil-commonjs=".length))); })) === null || _j === void 0 ? void 0 : _j[0];
+            .split("?")[1]) === null || _g === void 0 ? void 0 : _g.split("&")) === null || _h === void 0 ? void 0 : _h.filter(function (i) { return i.startsWith("evil-commonjs="); })) === null || _j === void 0 ? void 0 : _j.map(function (i) { return JSON.parse(decodeURIComponent(i.substring("evil-commonjs=".length))); })) === null || _k === void 0 ? void 0 : _k[0];
         if (urlConfig) {
             if ("object" === typeof urlConfig) {
                 if ("log" in urlConfig) {
@@ -296,16 +300,23 @@ var _this = this;
     };
     gThis.define = function (path, requires, content) {
         var absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
-        if (config.log.define) {
-            console.log("evil-commonjs: define(\"".concat(absolutePath, "\", ").concat(JSON.stringify(requires), ", ...)"));
-        }
-        if (/\.json(\?.*)?$/i.test(path) || "function" !== typeof content) {
-            return evil.modules[absolutePath] = content;
+        if (evil.modules[absolutePath]) {
+            if (config.log.define) {
+                console.log("evil-commonjs: \"".concat(absolutePath, "\" is already defined!"));
+            }
         }
         else {
-            evil.module.readyToCapture(absolutePath);
-            content.apply(null, requires.map(function (i) { return gThis.require(i); }));
-            evil.module.capture(absolutePath);
+            if (config.log.define) {
+                console.log("evil-commonjs: define(\"".concat(absolutePath, "\", ").concat(JSON.stringify(requires), ", ...)"));
+            }
+            if (/\.json(\?.*)?$/i.test(path) || "function" !== typeof content) {
+                return evil.modules[absolutePath] = content;
+            }
+            else {
+                evil.module.readyToCapture(absolutePath);
+                content.apply(null, requires.map(function (i) { return gThis.require(i); }));
+                evil.module.capture(absolutePath);
+            }
         }
     };
     setTimeout(function () {

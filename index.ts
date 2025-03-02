@@ -7,6 +7,7 @@ declare const evilCommonjsConfig: undefined |
         config?: boolean;
         load?: boolean;
         define?: boolean;
+        readyToCapture?: boolean;
         results?: boolean;
     }
     loadingTimeout?: number;
@@ -201,6 +202,10 @@ interface Window
             },
             readyToCapture: (path?: string) =>
             {
+                if (config.log.readyToCapture)
+                {
+                    console.log(`readyToCapture("${path}")`);
+                }
                 window.module.exports = window.exports = { };
                 if (path)
                 {
@@ -240,6 +245,7 @@ interface Window
             config: true === evilCommonjsConfig?.log?.config,
             load: false !== evilCommonjsConfig?.log?.load,
             define: false !== evilCommonjsConfig?.log?.define,
+            readyToCapture: false !== evilCommonjsConfig?.log?.readyToCapture,
             results: true === evilCommonjsConfig?.log?.results,
         },
         loadingTimeout: "number" === typeof evilCommonjsConfig?.loadingTimeout ? evilCommonjsConfig.loadingTimeout: 1500,
@@ -317,19 +323,29 @@ interface Window
     gThis.define = (path: string, requires: string[], content: any) =>
     {
         const absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
-        if (config.log.define)
+        if (evil.modules[absolutePath])
         {
-            console.log(`evil-commonjs: define("${absolutePath}", ${JSON.stringify(requires)}, ...)`);
-        }
-        if (/\.json(\?.*)?$/i.test(path) || "function" !== typeof content)
-        {
-            return evil.modules[absolutePath] = content;
+            if (config.log.define)
+            {
+                console.log(`evil-commonjs: "${absolutePath}" is already defined!`);
+            }
         }
         else
         {
-            evil.module.readyToCapture(absolutePath);
-            content.apply(null, requires.map(i => gThis.require(i)));
-            evil.module.capture(absolutePath);
+            if (config.log.define)
+            {
+                console.log(`evil-commonjs: define("${absolutePath}", ${JSON.stringify(requires)}, ...)`);
+            }
+            if (/\.json(\?.*)?$/i.test(path) || "function" !== typeof content)
+            {
+                return evil.modules[absolutePath] = content;
+            }
+            else
+            {
+                evil.module.readyToCapture(absolutePath);
+                content.apply(null, requires.map(i => gThis.require(i)));
+                evil.module.capture(absolutePath);
+            }
         }
     };
     setTimeout

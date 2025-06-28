@@ -169,13 +169,13 @@ interface Window
                             console.log(`evil-commonjs: load("${absolutePath}", ${JSON.stringify(mapping)})`);
                         }
                         await loadScript(absolutePath);
-                        const result = evil.module.capture(path, mapping);
-                        return result;
                     }
                     finally
                     {
                         pathStack.pop();
                     }
+                    const result = evil.module.capture(path, mapping);
+                    return result;
                 }
             },
             sequentialLoad: async (map: [{ path: string, mapping?: string[] }]): Promise<any[]> =>

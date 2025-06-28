@@ -160,12 +160,13 @@ var _this = this;
                             return [4 /*yield*/, loadScript(absolutePath)];
                         case 4:
                             _c.sent();
-                            result = evil.module.capture(path, mapping);
-                            return [2 /*return*/, result];
+                            return [3 /*break*/, 6];
                         case 5:
                             pathStack.pop();
                             return [7 /*endfinally*/];
-                        case 6: return [2 /*return*/];
+                        case 6:
+                            result = evil.module.capture(path, mapping);
+                            return [2 /*return*/, result];
                     }
                 });
             }); },

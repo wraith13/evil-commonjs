@@ -31,6 +31,7 @@ interface Window
 {
     const pathStack: string[] = [];
     pathStack.push(location.href);
+    const getBasePath = (): string => location.href;
     const getCurrentPath = () => pathStack[pathStack.length -1] ?? location.href;
     const loadScript = async (src: string): Promise<void> => new Promise<void>
     (
@@ -73,8 +74,11 @@ interface Window
             request.send(null);
         }
     );
-    const makeAbsoluteUrl = function(base: string, url: string): string
+    const makeAbsoluteUrl = function(path: string): string
     {
+        const mappedPath = resolveMapping(path);
+        const base = mappedPath ? getBasePath(): getCurrentPath();
+        const url = mappedPath ?? path;
         let baseParts = base.split("?")[0].split("/");
         if (4 <= baseParts.length && "" !== baseParts[baseParts.length -1])
         {
@@ -148,7 +152,7 @@ interface Window
                     {
                         evil.module.registerMapping(path, mapping);
                     }
-                    const absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
+                    const absolutePath = makeAbsoluteUrl(path);
                     if (config.log.load)
                     {
                         console.log(`evil-commonjs: load("${absolutePath}", ${JSON.stringify(mapping)})`);
@@ -159,7 +163,7 @@ interface Window
                 }
                 else
                 {
-                    const absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
+                    const absolutePath = makeAbsoluteUrl(path);
                     try
                     {
                         pathStack.push(absolutePath);
@@ -193,7 +197,7 @@ interface Window
                 {
                     evil.module.registerMapping(path, mapping);
                 }
-                const absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
+                const absolutePath = makeAbsoluteUrl(path);
                 window.module.exports.default = window.module.exports.default || window.module.exports;
                 const result = evil.modules[absolutePath] = window.module.exports;
                 window.module.pauseCapture();
@@ -209,7 +213,7 @@ interface Window
                 window.module.exports = window.exports = { };
                 if (path)
                 {
-                    const absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
+                    const absolutePath = makeAbsoluteUrl(path);
                     if (evil.modules[absolutePath])
                     {
                         window.module.exports = window.exports = evil.modules[absolutePath];
@@ -222,7 +226,7 @@ interface Window
     };
     const resolveMapping = (path: string): string =>
     {
-        return evil.mapping[path] || path;
+        return evil.mapping[path];
     };
     //const gThis = globalThis;
     const gThis = (self ?? window ?? global) as unknown as
@@ -310,10 +314,11 @@ interface Window
         case "exports":
             return evil.module.exports;
         default:
-            const absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
+            const absolutePath = makeAbsoluteUrl(path);
             let result = evil.modules[absolutePath] ?? evil.modules[path];
             if (!result)
             {
+console.log(`evil-commonjs: require("${path}") -> "${absolutePath}"`, getCurrentPath(), resolveMapping(path));
                 result = evil.modules[absolutePath] = { };
                 evil.unresolved.push(absolutePath);
             }
@@ -322,7 +327,7 @@ interface Window
     };
     gThis.define = (path: string, requires: string[], content: any) =>
     {
-        const absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
+        const absolutePath = makeAbsoluteUrl(path);
         if (evil.modules[absolutePath])
         {
             if (config.log.define)

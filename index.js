@@ -39,6 +39,7 @@ var _this = this;
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
     var pathStack = [];
     pathStack.push(location.href);
+    var getBasePath = function () { return location.href; };
     var getCurrentPath = function () { var _a; return (_a = pathStack[pathStack.length - 1]) !== null && _a !== void 0 ? _a : location.href; };
     var loadScript = function (src) { return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_a) {
@@ -75,7 +76,10 @@ var _this = this;
                 })];
         });
     }); };
-    var makeAbsoluteUrl = function (base, url) {
+    var makeAbsoluteUrl = function (path) {
+        var mappedPath = resolveMapping(path);
+        var base = mappedPath ? getBasePath() : getCurrentPath();
+        var url = mappedPath !== null && mappedPath !== void 0 ? mappedPath : path;
         var baseParts = base.split("?")[0].split("/");
         if (4 <= baseParts.length && "" !== baseParts[baseParts.length - 1]) {
             // ファイル名部分の除去
@@ -136,7 +140,7 @@ var _this = this;
                             if (mapping) {
                                 evil.module.registerMapping(path, mapping);
                             }
-                            absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
+                            absolutePath = makeAbsoluteUrl(path);
                             if (config.log.load) {
                                 console.log("evil-commonjs: load(\"".concat(absolutePath, "\", ").concat(JSON.stringify(mapping), ")"));
                             }
@@ -148,7 +152,7 @@ var _this = this;
                             window.module.pauseCapture();
                             return [2 /*return*/, result];
                         case 2:
-                            absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
+                            absolutePath = makeAbsoluteUrl(path);
                             _c.label = 3;
                         case 3:
                             _c.trys.push([3, , 5, 6]);
@@ -203,7 +207,7 @@ var _this = this;
                 if (mapping) {
                     evil.module.registerMapping(path, mapping);
                 }
-                var absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
+                var absolutePath = makeAbsoluteUrl(path);
                 window.module.exports.default = window.module.exports.default || window.module.exports;
                 var result = evil.modules[absolutePath] = window.module.exports;
                 window.module.pauseCapture();
@@ -216,7 +220,7 @@ var _this = this;
                 }
                 window.module.exports = window.exports = {};
                 if (path) {
-                    var absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
+                    var absolutePath = makeAbsoluteUrl(path);
                     if (evil.modules[absolutePath]) {
                         window.module.exports = window.exports = evil.modules[absolutePath];
                     }
@@ -227,7 +231,7 @@ var _this = this;
         },
     };
     var resolveMapping = function (path) {
-        return evil.mapping[path] || path;
+        return evil.mapping[path];
     };
     //const gThis = globalThis;
     var gThis = ((_a = self !== null && self !== void 0 ? self : window) !== null && _a !== void 0 ? _a : global);
@@ -290,9 +294,10 @@ var _this = this;
             case "exports":
                 return evil.module.exports;
             default:
-                var absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
+                var absolutePath = makeAbsoluteUrl(path);
                 var result = (_a = evil.modules[absolutePath]) !== null && _a !== void 0 ? _a : evil.modules[path];
                 if (!result) {
+                    console.log("evil-commonjs: require(\"".concat(path, "\") -> \"").concat(absolutePath, "\""), getCurrentPath(), resolveMapping(path));
                     result = evil.modules[absolutePath] = {};
                     evil.unresolved.push(absolutePath);
                 }
@@ -300,7 +305,7 @@ var _this = this;
         }
     };
     gThis.define = function (path, requires, content) {
-        var absolutePath = makeAbsoluteUrl(getCurrentPath(), resolveMapping(path));
+        var absolutePath = makeAbsoluteUrl(path);
         if (evil.modules[absolutePath]) {
             if (config.log.define) {
                 console.log("evil-commonjs: \"".concat(absolutePath, "\" is already defined!"));
